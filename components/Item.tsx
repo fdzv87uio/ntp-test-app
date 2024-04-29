@@ -35,19 +35,19 @@ export default function Item({ title, id, item }: ItemProps) {
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <View style={styles.descriptionWrapper}>
-                                <Text style={styles.modalText}><strong><u>Title:</u></strong></Text>
+                                <Text style={styles.modalText}>Title:</Text>
                                 <Text style={styles.modalText}>{item.title}</Text>
                             </View>
                             <View style={styles.descriptionWrapper}>
-                                <Text style={styles.modalText}><strong><u>Price:</u></strong></Text>
+                                <Text style={styles.modalText}>Price:</Text>
                                 <Text style={styles.modalText}>${item.price}</Text>
                             </View>
                             <View style={styles.descriptionWrapper}>
-                                <Text style={styles.modalText}><strong><u>Description:</u></strong></Text>
+                                <Text style={styles.modalText}>Description:</Text>
                                 <Text style={styles.modalText}>{item.description}</Text>
                             </View>
                             <View style={styles.descriptionWrapper}>
-                                <Text style={styles.modalText}><strong><u>Category:</u></strong></Text>
+                                <Text style={styles.modalText}>Category:</Text>
                                 <Text style={styles.modalText}>{item.category}</Text>
                             </View>
                             <Pressable
@@ -81,10 +81,10 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     card: {
-        flex: 1,
+        display: 'flex',
         flexDirection: 'column',
         width: "90%",
-        height: 850,
+        height: 'auto',
         backgroundColor: 'rgba(225, 225, 225, 0.25)',
         color: "black",
         marginVertical: 15,
@@ -120,7 +120,8 @@ const styles = StyleSheet.create({
     },
     imageWrapper: {
         width: '100%',
-        flex: 9,
+        height: 'auto',
+        display: 'flex',
         backgroundColor: 'white',
         flexDirection: 'column',
         alignItems: 'center',
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     },
     itemImage: {
         resizeMode: 'contain',
-        height: 400,
+        height: 420,
         width: 300,
     },
     centeredView: {

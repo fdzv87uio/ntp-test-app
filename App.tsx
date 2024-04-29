@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#151515',
     position: 'relative',
+    marginTop: 10,
   },
   headerIcon: {
     position: 'absolute',
