@@ -1,18 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
 import { Suspense, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, Modal, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { fetchApiData } from './utils/fetchApiData';
-import Item from './components/Item';
+import { fetchApiData } from '../utils/fetchApiData';
+import Item from '../components/Item';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { RadioButton } from 'react-native-paper';
+import FilterModal from '@/components/FilterModal';
+import AuthModal from '@/components/AuthModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getValidatedToken } from '@/utils/authUtils';
+import { router } from 'expo-router';
 
-export default function App() {
+export default function Shop() {
 
   const [data, setData] = useState<any[]>();
   const [displayedData, setDisplayedData] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [authModalVisible, setAuthModalVisible] = useState(false);
   const [selectedValue, setSelectedValue] = useState('option1');
   const [categories, setCategories] = useState<any[]>();
 
@@ -20,8 +26,6 @@ export default function App() {
     setIsLoading(true);
     const result = await fetchApiData();
     if (result) {
-      console.log('RES');
-      console.log(result);
       setData(result);
       let categorySet = new Set();
       result.forEach((x: any) => {
@@ -62,8 +66,6 @@ export default function App() {
   function filterData() {
     if (selectedValue !== 'all' && data) {
       let filtered = data.filter((x: any) => x.category === selectedValue);
-      console.log('FD');
-      console.log(filtered);
       setDisplayedData(filtered);
     }
   }
@@ -84,6 +86,22 @@ export default function App() {
     //reload
   }, [displayedData])
 
+  //check if token is valid
+  useEffect(() => {
+    validateToken();
+  }, [])
+
+  async function validateToken() {
+    const token: any = await AsyncStorage.getItem('auth-token');
+    if (token) {
+      const res: any = await getValidatedToken(token);
+      if (res.data.status === "success") {
+        console.log('token validated');
+      } else {
+        router.replace('/');
+      }
+    }
+  }
 
 
 
@@ -106,7 +124,13 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Image source={require("./assets/logo.png")} style={styles.logo} />
+        <View style={styles.headerIcon}>
+          <Pressable
+            onPress={() => setAuthModalVisible(!authModalVisible)}>
+            <Ionicons name="menu" size={34} color="#E0FF73" />
+          </Pressable>
+        </View>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
         <View style={styles.headerIcon}>
           <Pressable
             onPress={() => setModalVisible(!modalVisible)}>
@@ -128,59 +152,8 @@ export default function App() {
         />
       )}
       <StatusBar />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible);
-        }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.radioButtonWrapper}>
-              <View style={styles.radioButton}>
-                <RadioButton.Android
-                  value={'all'}
-                  status={selectedValue === 'all' ?
-                    'checked' : 'unchecked'}
-                  onPress={() => {
-                    handleRadioSelect('all');
-                    if (data) {
-                      setDisplayedData(data);
-                    }
-                  }}
-                  color="#007BFF"
-                />
-                <Text style={styles.radioLabel}>
-                  All
-                </Text>
-              </View>
-              {categories?.map((x: any, key: number) => {
-                return (
-                  <View key={key} style={styles.radioButton}>
-                    <RadioButton.Android
-                      value={x}
-                      status={selectedValue === x ?
-                        'checked' : 'unchecked'}
-                      onPress={() => handleRadioSelect(x)}
-                      color="#007BFF"
-                    />
-                    <Text style={styles.radioLabel}>
-                      {x}
-                    </Text>
-                  </View>
-                )
-              })}
-            </View>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Hide Filters</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      <FilterModal modalVisible={modalVisible} setModalVisible={setModalVisible} handleRadioSelect={handleRadioSelect} selectedValue={selectedValue} setDisplayedData={setDisplayedData} categories={categories} data={data} />
+      <AuthModal authModalVisible={authModalVisible} setAuthModalVisible={setAuthModalVisible} />
     </SafeAreaView>
   );
 }
@@ -188,7 +161,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#A8919C',
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -196,20 +169,19 @@ const styles = StyleSheet.create({
   header: {
     width: "100%",
     height: 100,
-    flexDirection: 'column',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#151515',
+    backgroundColor: '#6D4859',
     position: 'relative',
-    marginTop: 10,
+    paddingHorizontal: 20,
   },
   headerIcon: {
-    position: 'absolute',
-    right: 30,
   },
   logo: {
-    width: 170,
-    height: 50,
+    width: 70,
+    height: 70,
   },
   itemContainer: {
     width: 400,
@@ -231,56 +203,4 @@ const styles = StyleSheet.create({
     marginTop: 22,
     marginBottom: 0,
   },
-  modalView: {
-    backgroundColor: '#151515',
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    padding: 35,
-    width: '100%',
-    height: 600,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: 40,
-    borderRadius: 20,
-  },
-  buttonOpen: {
-    backgroundColor: '#E0FF73',
-  },
-  buttonClose: {
-    backgroundColor: '#E0FF73',
-  },
-  textStyle: {
-    color: 'black',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  radioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  radioLabel: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#fff',
-
-  },
-  radioButtonWrapper: {
-    marginTop: 20,
-    marginBottom: 40,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  }
 });

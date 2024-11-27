@@ -11,7 +11,7 @@ interface ItemProps {
 export default function Item({ title, id, item }: ItemProps) {
     const [modalVisible, setModalVisible] = useState(false);
     return (
-        <View key={id + "-" + title} style={styles.itemContainer}>
+        <View key={item.description} style={styles.itemContainer}>
             <View style={styles.card}>
                 <Text style={styles.itemText}>{title}</Text>
                 <View style={styles.imageWrapper}>
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        marginTop: 100,
+        marginTop: 80,
     },
     itemContainer: {
         flex: 1,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: "100%",
         height: 'auto',
-        backgroundColor: "#000000",
+        backgroundColor: "#A8919C",
         color: "black",
         marginVertical: 10,
     },
